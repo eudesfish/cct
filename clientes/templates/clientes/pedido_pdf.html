@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pedido {{ pedido.id }}</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            color: #333;
+            margin: 20mm;
+        }
+        .header {
+            display: flex;
+            align-items: center; /* Centraliza verticalmente */
+            justify-content: center; /* Centraliza horizontalmente */
+            text-align: center;
+            margin-bottom: 15mm;
+        }
+        .header-content {
+            text-align: center;
+        }
+        .logo {
+            max-width: 150px;
+            height: auto;
+            margin-right: 20px; /* Adiciona espaço à direita da logo */
+        }
+        h1 {
+            color: #2c5282;
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+        h2 {
+            color: #2c5282;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        h3 {
+            color: #2c5282;
+            font-size: 14px;
+        }
+        .section {
+            margin-bottom: 10mm;
+        }
+        .info-block {
+            border: 1px solid #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        .info-block p {
+            margin: 0 0 5px 0;
+            font-size: 12px;
+        }
+        .products table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .products th, .products td {
+            border: 1px solid #e2e8f0;
+            padding: 8px;
+            text-align: left;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="{{ logo_url }}" alt="Logo da Empresa" class="logo">
+        <div class="header-content">
+            <h1>Relatório de Pedido</h1>
+            <h3>Pedido #{{ pedido.id }}</h3>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Detalhes do Cliente</h2>
+        <div class="info-block">
+            <p><strong>Nome da Marca:</strong> {{ pedido.cliente.nome_marca }}</p>
+            <p><strong>Telefone:</strong> {{ pedido.cliente.telefone }}</p>
+            <p><strong>Endereço:</strong> {{ pedido.cliente.endereco }}</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Informações do Pedido</h2>
+        <div class="info-block">
+            <p><strong>Status:</strong> {{ pedido.get_status_display }}</p>
+            <p><strong>Data de Criação:</strong> {{ pedido.data_criacao|date:"d/m/Y H:i" }}</p>
+            <p><strong>Última Atualização:</strong> {{ pedido.data_atualizacao|date:"d/m/Y H:i" }}</p>
+            {% if pedido.status == 'envio' %}
+                <p><strong>Número de Rastreio:</strong> {{ pedido.numero_rastreio }}</p>
+                <p><strong>Nome da Transportadora:</strong> {{ pedido.nome_transportadora }}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="section products">
+        <h2>Produtos</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Nome do Produto</th>
+                    <th>Código de Barras</th>
+                    <th>Quantidade</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in pedido.itempedido_set.all %}
+                <tr>
+                    <td>{{ item.produto.nome_produto }}</td>
+                    <td>{{ item.produto.codigo_barras }}</td>
+                    <td>{{ item.quantidade }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

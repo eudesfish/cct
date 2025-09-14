@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-gray-800">Clientes Terceirizados</h1>
+        <a href="{% url 'criar_cliente' %}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+            </svg>
+            Adicionar Cliente
+        </a>
+    </div>
+
+    <div class="space-y-4">
+        {% for cliente in clientes %}
+        <div class="bg-white rounded-lg shadow-md p-6 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+            <div class="flex-grow">
+                <a href="{% url 'detalhe_cliente' pk=cliente.pk %}" class="block text-xl font-semibold text-gray-900 hover:text-indigo-600">
+                    {{ cliente.nome_marca }}
+                </a>
+                <div class="mt-1 text-sm text-gray-500 flex items-center space-x-4">
+                    <span class="flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.158l-2.26 1.498a1 1 0 00-.494 1.15l.685 1.588a1 1 0 01-.19 1.144l-1.55 1.55a1 1 0 01-1.414 0l-2-2a1 1 0 010-1.414l2.5-2.5a1 1 0 000-1.414l-2.5-2.5a1 1 0 00-1.414 0z" />
+                        </svg>
+                        {{ cliente.telefone }}
+                    </span>
+                    <span class="flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        {{ cliente.endereco }}
+                    </span>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-4">
+                <a href="{% url 'editar_cliente' pk=cliente.pk %}" class="text-indigo-600 hover:text-indigo-900 transition duration-150 ease-in-out">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                    </svg>
+                </a>
+                <a href="{% url 'excluir_cliente' pk=cliente.pk %}" class="text-red-600 hover:text-red-900 transition duration-150 ease-in-out">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.095 21H7.905a2 2 0 01-1.932-1.858L5 7m5-4v1m4-1v1M5 7h14" />
+                    </svg>
+                </a>
+            </div>
+        </div>
+        {% empty %}
+        <div class="bg-white rounded-lg shadow-md p-6 text-center text-gray-500">
+            Nenhum cliente cadastrado.
+        </div>
+        {% endfor %}
+    </div>
+{% endblock %}
