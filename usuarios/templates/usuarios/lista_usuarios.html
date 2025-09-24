@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-3xl font-bold text-gray-800">Usuários do Sistema</h1>
+    <a href="{% url 'criar_usuario' %}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+        </svg>
+        Criar Usuário
+    </a>
+</div>
+
+<div class="space-y-4">
+    {% for usuario in usuarios %}
+    <div class="bg-white rounded-lg shadow-md p-6 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+        <div class="flex-grow">
+            <p class="text-xl font-semibold text-gray-900">{{ usuario.username }}</p>
+            <p class="text-sm text-gray-500">Email: {{ usuario.email }}</p>
+            <p class="text-sm text-gray-500">
+                Grupo:
+                {% for group in usuario.groups.all %}
+                    {{ group.name }}{% if not forloop.last %}, {% endif %}
+                {% empty %}
+                    Sem grupo
+                {% endfor %}
+            </p>
+            {% if usuario.is_superuser %}
+                <span class="text-xs text-red-600 font-bold">Usuário Master</span>
+            {% endif %}
+        </div>
+
+        <div class="flex items-center space-x-4">
+            <a href="{% url 'editar_usuario' usuario.id %}" class="text-indigo-600 hover:text-indigo-900 transition duration-150 ease-in-out">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                </svg>
+            </a>
+            {% if not usuario.is_superuser %}
+            <form action="{% url 'excluir_usuario' usuario.id %}" method="post" class="inline">
+                {% csrf_token %}
+                <button type="submit" class="text-red-600 hover:text-red-900">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.095 21H7.905a2 2 0 01-1.932-1.858L5 7m5-4v1m4-1v1M5 7h14" />
+                    </svg>
+                </button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+    {% empty %}
+    <div class="bg-white rounded-lg shadow-md p-6 text-center text-gray-500">
+        Nenhum usuário cadastrado.
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

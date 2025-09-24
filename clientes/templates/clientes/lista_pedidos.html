@@ -1,133 +1,140 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <h1 class="text-3xl font-bold leading-tight text-gray-900 mb-6">Lista de Pedidos</h1>
-        
-        <div id="status-message" class="hidden mb-4 p-4 rounded-lg bg-green-100 text-green-700 font-medium"></div>
+<div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-6">📋 Lista de Pedidos</h1>
 
-        <div class="mb-4 flex justify-between items-center">
-            <a href="{% url 'criar_pedido' %}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                </svg>
-                Novo Pedido
-            </a>
-            <div class="flex space-x-2">
-                {% for status_item in pedidos_por_status %}
-                    <a href="#" class="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-500 hover:bg-blue-600 focus:outline-none">
-                        {{ status_item.status_display }} ({{ status_item.count }})
-                    </a>
-                {% endfor %}
-            </div>
-        </div>
+    <!-- Mensagem de status -->
+    <div id="status-message" class="hidden mb-4 p-4 rounded-lg"></div>
 
-        <div class="bg-white shadow overflow-hidden rounded-lg">
-            <div class="align-middle inline-block min-w-full">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ultima Atualização</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                            <th scope="col" class="relative px-6 py-3"><span class="sr-only">Ações</span></th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        {% for pedido in pedidos %}
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                {{ pedido.id }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ pedido.cliente.nome_marca }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ pedido.data_atualizacao }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                <form action="{% url 'atualizar_status_pedido' pedido.pk %}" method="post" class="form-status inline-block" data-pedido-id="{{ pedido.pk }}">
-                                    {% csrf_token %}
-                                    <select name="status" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500">
-                                        {% for status_choice in form.fields.status.choices %}
-                                            <option value="{{ status_choice.0 }}" {% if pedido.status == status_choice.0 %}selected{% endif %}>
-                                                {{ status_choice.1 }}
-                                            </option>
-                                        {% endfor %}
-                                    </select>
-                                </form>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <a href="{% url 'detalhe_pedido' pedido.pk %}" class="text-indigo-600 hover:text-indigo-900 mr-2">Detalhes</a>
-                                <a href="{% url 'editar_pedido' pedido.pk %}" class="text-green-600 hover:text-green-900 mr-2">Editar</a>
-                                <form action="{% url 'excluir_pedido' pedido.pk %}" method="post" class="inline">
-                                    {% csrf_token %}
-                                    <button type="submit" class="text-red-600 hover:text-red-900">Excluir</button>
-                                </form>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="5" class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
-                                Nenhum pedido encontrado.
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+    <!-- Barra superior -->
+    <div class="mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+        {% if is_admin %}
+        <a href="{% url 'criar_pedido' %}" 
+           class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg shadow-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            Novo Pedido
+        </a>
+        {% endif %}
+
+        <div class="flex flex-wrap gap-2">
+            {% for status_item in pedidos_por_status %}
+                <span class="inline-flex items-center px-3 py-1 text-sm font-medium rounded-full 
+                             {% if status_item.status_display == 'Entrada' %} bg-blue-100 text-blue-800
+                             {% elif status_item.status_display == 'Produção' %} bg-yellow-100 text-yellow-800
+                             {% elif status_item.status_display == 'Finalizado' %} bg-green-100 text-green-800
+                             {% else %} bg-gray-100 text-gray-800 {% endif %}">
+                    {{ status_item.status_display }} ({{ status_item.count }})
+                </span>
+            {% endfor %}
         </div>
     </div>
+
+    <!-- Tabela -->
+    <div class="bg-white shadow-lg rounded-xl overflow-hidden">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-100">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">ID</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Cliente</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Última Atualização</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
+                    <th class="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Ações</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+                {% for pedido in pedidos %}
+                <tr class="hover:bg-gray-50 transition">
+                    <td class="px-6 py-4 text-sm font-medium text-gray-900">#{{ pedido.id }}</td>
+                    <td class="px-6 py-4 text-sm text-gray-700">{{ pedido.cliente.nome_marca }}</td>
+                    <td class="px-6 py-4 text-sm text-gray-500">{{ pedido.data_atualizacao }}</td>
+                    <td class="px-6 py-4 text-sm">
+                        <form action="{% url 'atualizar_status_pedido' pedido.pk %}" method="post" 
+                              class="form-status inline-block" data-pedido-id="{{ pedido.pk }}">
+                            {% csrf_token %}
+                            <select name="status" 
+                                    class="block w-40 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                                    {% if not is_admin %}disabled{% endif %}>
+                                {% for status_choice in form.fields.status.choices %}
+                                    <option value="{{ status_choice.0 }}" {% if pedido.status == status_choice.0 %}selected{% endif %}>
+                                        {{ status_choice.1 }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </form>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-right space-x-2">
+                        <a href="{% url 'detalhe_pedido' pedido.pk %}" class="text-indigo-600 hover:text-indigo-900 font-medium">Detalhes</a>
+
+                        {% if is_admin %}
+                        <a href="{% url 'editar_pedido' pedido.pk %}" class="text-green-600 hover:text-green-900 font-medium">Editar</a>
+                        <form action="{% url 'excluir_pedido' pedido.pk %}" method="post" class="inline">
+                            {% csrf_token %}
+                            <button type="submit" class="text-red-600 hover:text-red-900 font-medium">Excluir</button>
+                        </form>
+                        {% endif %}
+
+                        <!-- Botão Exportar PDF -->
+                        <a href="{% url 'exportar_pedido_pdf' pedido.pk %}" 
+                           class="inline-flex items-center px-3 py-1 text-xs font-medium rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-800">
+                            📄 PDF
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">
+                        Nenhum pedido encontrado.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_scripts %}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const statusForms = document.querySelectorAll('.form-status');
-        const messageContainer = document.getElementById('status-message');
+document.addEventListener('DOMContentLoaded', function() {
+    const statusForms = document.querySelectorAll('.form-status');
+    const messageContainer = document.getElementById('status-message');
 
-        statusForms.forEach(form => {
-            const select = form.querySelector('select[name="status"]');
-            
+    statusForms.forEach(form => {
+        const select = form.querySelector('select[name="status"]');
+        
+        if (!select.disabled) {
             select.addEventListener('change', function() {
                 const formData = new FormData(form);
-                const pedidoId = form.dataset.pedidoId;
 
                 fetch(form.action, {
                     method: 'POST',
                     body: formData,
-                    headers: {
-                        'X-CSRFToken': formData.get('csrfmiddlewaretoken')
-                    }
+                    headers: { 'X-CSRFToken': formData.get('csrfmiddlewaretoken') }
                 })
                 .then(response => response.json())
                 .then(data => {
+                    messageContainer.classList.remove('hidden');
                     if (data.success) {
-                        messageContainer.classList.remove('hidden', 'bg-red-100', 'text-red-700');
-                        messageContainer.classList.add('bg-green-100', 'text-green-700');
+                        messageContainer.className = "mb-4 p-4 rounded-lg bg-green-100 text-green-700 font-medium";
                         messageContainer.textContent = data.message;
                     } else {
-                        messageContainer.classList.remove('hidden', 'bg-green-100', 'text-green-700');
-                        messageContainer.classList.add('bg-red-100', 'text-red-700');
+                        messageContainer.className = "mb-4 p-4 rounded-lg bg-red-100 text-red-700 font-medium";
                         messageContainer.textContent = data.message;
                     }
-                    messageContainer.style.display = 'block';
-                    setTimeout(() => {
-                        messageContainer.style.display = 'none';
-                    }, 5000); // Esconde a mensagem após 5 segundos
+                    setTimeout(() => messageContainer.classList.add('hidden'), 5000);
                 })
-                .catch(error => {
-                    messageContainer.classList.remove('hidden', 'bg-green-100', 'text-green-700');
-                    messageContainer.classList.add('bg-red-100', 'text-red-700');
-                    messageContainer.textContent = 'Ocorreu um erro ao processar a requisição.';
-                    messageContainer.style.display = 'block';
-                    setTimeout(() => {
-                        messageContainer.style.display = 'none';
-                    }, 5000);
+                .catch(() => {
+                    messageContainer.className = "mb-4 p-4 rounded-lg bg-red-100 text-red-700 font-medium";
+                    messageContainer.textContent = 'Erro ao processar a requisição.';
+                    messageContainer.classList.remove('hidden');
+                    setTimeout(() => messageContainer.classList.add('hidden'), 5000);
                 });
             });
-        });
+        }
     });
+});
 </script>
 {% endblock %}

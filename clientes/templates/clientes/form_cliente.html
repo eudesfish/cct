@@ -93,50 +93,53 @@
         const adicionarBtn = document.getElementById('adicionar-produto');
         const listaUl = document.getElementById('lista-produtos-ul');
         let produtoCounter = 0;
+        let editandoIndex = null; // controla se estamos editando algum produto
 
         // Função para criar o item de produto na lista e os inputs ocultos
         function createProductItem(nome, codigo, processo, index) {
             const li = document.createElement('li');
             li.className = 'py-4 flex items-center justify-between';
+            li.dataset.index = index;
             li.innerHTML = `
                 <div class="flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-400 mr-4" viewBox="0 0 20 20" fill="currentColor">
                         <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
                     </svg>
                     <div>
-                        <p class="text-sm font-medium text-gray-900">${nome}</p>
-                        <p class="text-xs text-gray-500">Cód. Barras: ${codigo} | Processo: ${processo}</p>
+                        <p class="text-sm font-medium text-gray-900 nome-produto">${nome}</p>
+                        <p class="text-xs text-gray-500 detalhes-produto">Cód. Barras: ${codigo} | Processo: ${processo}</p>
                     </div>
                 </div>
-                <button type="button" class="remover-produto text-sm text-red-600 hover:text-red-900" data-index="${index}">
-                    Remover
-                </button>
+                <div class="space-x-3">
+                    <button type="button" class="editar-produto text-sm text-blue-600 hover:text-blue-900" data-index="${index}">Editar</button>
+                    <button type="button" class="remover-produto text-sm text-red-600 hover:text-red-900" data-index="${index}">Remover</button>
+                </div>
             `;
             
-            // Cria os inputs ocultos e os anexa ao formulário
+            // Cria os inputs ocultos
             const hiddenInputNome = document.createElement('input');
             hiddenInputNome.type = 'hidden';
             hiddenInputNome.name = `produto-${index}-nome_produto`;
             hiddenInputNome.value = nome;
-            
+
             const hiddenInputCodigo = document.createElement('input');
             hiddenInputCodigo.type = 'hidden';
             hiddenInputCodigo.name = `produto-${index}-codigo_barras`;
             hiddenInputCodigo.value = codigo;
-            
+
             const hiddenInputProcesso = document.createElement('input');
             hiddenInputProcesso.type = 'hidden';
             hiddenInputProcesso.name = `produto-${index}-numero_processo`;
             hiddenInputProcesso.value = processo;
-            
-            form.appendChild(hiddenInputNome);
-            form.appendChild(hiddenInputCodigo);
-            form.appendChild(hiddenInputProcesso);
-            
+
+            li.appendChild(hiddenInputNome);
+            li.appendChild(hiddenInputCodigo);
+            li.appendChild(hiddenInputProcesso);
+
             listaUl.appendChild(li);
         }
 
-        // Lógica para pré-popular a lista de produtos na edição
+        // Pré-popular (edição de cliente existente)
         {% if produtos_cliente %}
             {% for produto in produtos_cliente %}
                 createProductItem("{{ produto.nome_produto }}", "{{ produto.codigo_barras }}", "{{ produto.numero_processo }}", produtoCounter);
@@ -144,36 +147,70 @@
             {% endfor %}
         {% endif %}
 
-        // Lidar com o botão de adicionar novo produto
+        // Clique para adicionar ou salvar edição
         adicionarBtn.addEventListener('click', function() {
-            const nome_produto = document.getElementById('id_nome_produto').value;
-            const codigo_barras = document.getElementById('id_codigo_barras').value;
-            const numero_processo = document.getElementById('id_numero_processo').value;
+            const nome_produto = document.getElementById('id_nome_produto').value.trim();
+            const codigo_barras = document.getElementById('id_codigo_barras').value.trim();
+            const numero_processo = document.getElementById('id_numero_processo').value.trim();
 
             if (nome_produto && codigo_barras && numero_processo) {
-                createProductItem(nome_produto, codigo_barras, numero_processo, produtoCounter);
-                
+                if (editandoIndex !== null) {
+                    // Atualizar item existente
+                    const li = listaUl.querySelector(`li[data-index="${editandoIndex}"]`);
+                    li.querySelector('.nome-produto').textContent = nome_produto;
+                    li.querySelector('.detalhes-produto').textContent = `Cód. Barras: ${codigo_barras} | Processo: ${numero_processo}`;
+
+                    li.querySelector(`input[name="produto-${editandoIndex}-nome_produto"]`).value = nome_produto;
+                    li.querySelector(`input[name="produto-${editandoIndex}-codigo_barras"]`).value = codigo_barras;
+                    li.querySelector(`input[name="produto-${editandoIndex}-numero_processo"]`).value = numero_processo;
+
+                    // Reset estado
+                    editandoIndex = null;
+                    adicionarBtn.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+                        </svg>
+                        Adicionar Produto
+                    `;
+                } else {
+                    // Criar novo item
+                    createProductItem(nome_produto, codigo_barras, numero_processo, produtoCounter);
+                    produtoCounter++;
+                }
+
+                // Limpar inputs
                 document.getElementById('id_nome_produto').value = '';
                 document.getElementById('id_codigo_barras').value = '';
                 document.getElementById('id_numero_processo').value = '';
-                
-                produtoCounter++;
             }
         });
 
-        // Lidar com o botão de remover produto
+        // Eventos em lista: remover ou editar
         listaUl.addEventListener('click', function(e) {
-            if (e.target.classList.contains('remover-produto')) {
-                const li = e.target.closest('li');
-                const index = e.target.dataset.index;
-                li.remove();
+            const index = e.target.dataset.index;
 
-                // Remove os inputs ocultos correspondentes
-                document.querySelectorAll(`input[name^="produto-${index}-"]`).forEach(input => {
-                    input.remove();
-                });
+            // Remover
+            if (e.target.classList.contains('remover-produto')) {
+                const li = listaUl.querySelector(`li[data-index="${index}"]`);
+                li.remove();
+            }
+
+            // Editar
+            if (e.target.classList.contains('editar-produto')) {
+                const li = listaUl.querySelector(`li[data-index="${index}"]`);
+                const nome = li.querySelector(`input[name="produto-${index}-nome_produto"]`).value;
+                const codigo = li.querySelector(`input[name="produto-${index}-codigo_barras"]`).value;
+                const processo = li.querySelector(`input[name="produto-${index}-numero_processo"]`).value;
+
+                document.getElementById('id_nome_produto').value = nome;
+                document.getElementById('id_codigo_barras').value = codigo;
+                document.getElementById('id_numero_processo').value = processo;
+
+                editandoIndex = index;
+                adicionarBtn.innerHTML = "Salvar Alterações";
             }
         });
     });
 </script>
+
 {% endblock %}

@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-lg mx-auto bg-white p-6 rounded-lg shadow-md">
+    <h1 class="text-2xl font-bold mb-6">{{ acao }} Usuário</h1>
+
+    <form method="POST" class="space-y-4">
+        {% csrf_token %}
+
+        <div>
+            <label class="block font-semibold">Usuário</label>
+            <input type="text" name="username" value="{{ usuario.username|default_if_none:'' }}" required
+                   class="w-full border rounded px-3 py-2 focus:ring focus:ring-blue-300">
+        </div>
+
+        <div>
+            <label class="block font-semibold">Email</label>
+            <input type="email" name="email" value="{{ usuario.email|default_if_none:'' }}"
+                   class="w-full border rounded px-3 py-2 focus:ring focus:ring-blue-300">
+        </div>
+
+        <div>
+            <label class="block font-semibold">Senha</label>
+            <input type="password" name="password" placeholder="{% if acao == 'Editar' %}Deixe em branco para manter a atual{% endif %}"
+                   class="w-full border rounded px-3 py-2 focus:ring focus:ring-blue-300">
+        </div>
+
+        <div>
+            <label class="block font-semibold">Grupo</label>
+            <select name="grupo" class="w-full border rounded px-3 py-2 focus:ring focus:ring-blue-300">
+                <option value="">-- Selecione --</option>
+                {% for grupo in grupos %}
+                <option value="{{ grupo.name }}" 
+                        {% if usuario and usuario.groups.first and usuario.groups.first.name == grupo.name %}selected{% endif %}>
+                    {{ grupo.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="flex justify-end space-x-3">
+            <a href="{% url 'lista_usuarios' %}" 
+               class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Cancelar</a>
+            <button type="submit" 
+                    class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">{{ acao }}</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

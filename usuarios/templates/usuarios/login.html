@@ -1,0 +1,59 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Controle de Clientes Terceirizados</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+
+    <div class="w-full max-w-md bg-white rounded-lg shadow-lg p-8">
+        <div class="mb-6 text-center">
+            <img class="h-12 w-12 mx-auto mb-4" src="{% static 'images/logo.png' %}" alt="Logo">
+            <h2 class="text-2xl font-bold text-gray-800">Acesse o Sistema</h2>
+            <p class="text-gray-500 mt-1">Digite seu usuário e senha</p>
+        </div>
+
+        <form method="POST" class="space-y-4">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+                <div class="bg-red-100 text-red-700 p-2 rounded">
+                    {% for error in form.non_field_errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div>
+                <label for="username" class="block text-sm font-medium text-gray-700">Usuário</label>
+                <input type="text" name="username" id="username" value="{{ form.username.value }}" required
+                       class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                {% if form.username.errors %}
+                    <p class="text-sm text-red-600 mt-1">{{ form.username.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="password" class="block text-sm font-medium text-gray-700">Senha</label>
+                <input type="password" name="password" id="password" required
+                       class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                {% if form.password.errors %}
+                    <p class="text-sm text-red-600 mt-1">{{ form.password.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <button type="submit"
+                    class="w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-md shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                Entrar
+            </button>
+        </form>
+
+        <p class="text-sm text-gray-500 mt-4 text-center">
+            &copy; 2025 Controle de Clientes Terceirizados
+        </p>
+    </div>
+
+</body>
+</html>
